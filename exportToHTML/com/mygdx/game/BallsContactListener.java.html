@@ -1,0 +1,123 @@
+<html>
+<head>
+<title>BallsContactListener.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #000080; font-weight: bold;}
+.s1 { color: #000000;}
+.s2 { color: #0000ff;}
+.s3 { color: #808080; font-style: italic;}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+BallsContactListener.java</font>
+</center></td></tr></table>
+<pre><span class="s0">package </span>com.mygdx.game;
+
+<span class="s0">import </span>java.util.ArrayList;
+<span class="s0">import </span>java.util.List;
+
+<span class="s0">import </span>kepler.ContactListener;
+<span class="s0">import </span>kepler.Vec3;
+<span class="s0">import </span>kepler.World;
+
+<span class="s0">public class </span>BallsContactListener <span class="s0">extends </span>ContactListener {
+
+    List&lt;Integer&gt; memIndexes = <span class="s0">new </span>ArrayList&lt;&gt;();
+
+    <span class="s0">public </span>BallsContactListener(World world) {
+        <span class="s0">super</span>(world);
+    }
+
+    @Override
+    <span class="s0">public void </span>beginContactWall(<span class="s0">int </span>bodyIndex, <span class="s0">int </span>bodyUid, World.Walls wall) {
+        Ball ball = (Ball)world.getBody(bodyIndex);
+        ball.isNew = <span class="s0">false</span>;
+        <span class="s0">if</span>(ball.neighboursIndexes.size() &gt;= <span class="s2">3</span>) {
+            <span class="s0">if </span>(ball.getSpeed() &lt; ball.getRadius() * <span class="s2">0.01f</span>) {
+                ball.setKinematic(<span class="s0">true</span>);
+            }
+        }
+    }
+
+    @Override
+    <span class="s0">public void </span>beginContactBodies(<span class="s0">int </span>firstBodyIndex, <span class="s0">int </span>secondBodyIndex, Vec3 point) {
+        Ball firstBall = (Ball)world.getBody(firstBodyIndex);
+        Ball secondBall = (Ball)world.getBody(secondBodyIndex);
+
+        firstBall.isNew = <span class="s0">false</span>;
+        secondBall.isNew = <span class="s0">false</span>;
+
+        <span class="s0">if</span>(firstBall.neighboursIndexes.size() &gt;= <span class="s2">5</span>) {
+            <span class="s0">if </span>(firstBall.getSpeed() &lt; firstBall.getRadius() * <span class="s2">0.01f</span>)
+                firstBall.setKinematic(<span class="s0">true</span>);
+            <span class="s0">else    if</span>(firstBall.neighboursIndexes.size() &gt;= <span class="s2">6</span>) {
+                firstBall.setKinematic(<span class="s0">true</span>);
+            }
+        }
+
+
+        <span class="s0">if</span>(secondBall.neighboursIndexes.size() &gt;= <span class="s2">5</span>) {
+            <span class="s0">if </span>(secondBall.getSpeed() &lt; firstBall.getRadius() * <span class="s2">0.01f</span>)
+                secondBall.setKinematic(<span class="s0">true</span>);
+            <span class="s0">else    if</span>(secondBall.neighboursIndexes.size() &gt;= <span class="s2">6</span>) {
+                secondBall.setKinematic(<span class="s0">true</span>);
+            }
+        }
+
+
+        <span class="s0">if</span>(secondBall.isKinematic &amp;&amp; secondBall.pos.y &gt; firstBall.pos.y ) {
+            firstBall.setKinematic(<span class="s0">true</span>);
+        }
+        <span class="s0">if</span>(firstBall.isKinematic &amp;&amp; firstBall.pos.y &gt; secondBall.pos.y ) {
+            secondBall.setKinematic(<span class="s0">true</span>);
+        }
+
+
+
+        <span class="s0">if</span>(firstBall.neighboursIndexes.size() &gt;= <span class="s2">2</span>) {
+            <span class="s0">for</span>(Integer item : firstBall.neighboursIndexes){
+                Ball nb = ((Ball)world.getBody(item.intValue()));
+                <span class="s0">if</span>(nb.type() == firstBall.type()) {
+                    memIndexes.add(item);
+
+                    <span class="s0">if</span>(memIndexes.size() &gt;= <span class="s2">2</span>) {
+                        firstBall.life = <span class="s2">0</span>;
+                        <span class="s0">for</span>(Integer itemMem : memIndexes){
+                            Ball nnb = ((Ball)world.getBody(itemMem.intValue()));
+                            nnb.life = <span class="s2">0</span>;
+                        }
+                        memIndexes.clear();
+
+                    }
+
+                }
+            }
+
+
+        }
+<span class="s3">//</span>
+
+
+//        if(firstBall.type == secondBall.type) {
+//            if(!memIndexes.contains(firstBodyIndex))
+//                memIndexes.add(firstBodyIndex);
+//
+//            if(!memIndexes.contains(secondBodyIndex))
+//                memIndexes.add(secondBodyIndex);
+//
+//            for(Integer item : memIndexes){
+//                if(world.getBody(item.intValue()).uid != firstBall.uid &amp;&amp; world.getBody(item.intValue()).uid !=secondBall.uid ) {
+//
+//                }
+//            }
+//
+//        }
+    }
+}
+</pre>
+</body>
+</html>
