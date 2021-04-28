@@ -108,11 +108,11 @@ public class World {
     public void removeBodyByUid(int uid) {
         for(int i = 0; i < bodies.size(); i++) {
             if(bodies.get(i).uid == uid) {
-                Body body = bodies.get(i);
-                for(Integer item : body.neighboursIndexes){
-                    Body nb =  getBody(item.intValue());
-                    nb.setKinematic(false);
-                }
+                //Body body = bodies.get(i);
+                //for(Integer item : body.neighboursIndexes){
+                //    Body nb =  getBody(item.intValue());
+                //    nb.setKinematic(false);
+                //}
                 bodies.remove(i);
                 break;
             }
@@ -155,19 +155,19 @@ public class World {
 
             if(body1.isAllowCollision()) {
 
-                if (body1.pos.y < WORLD_BOTTOM_WALL + body1.getRadius()) {
-                    body1.pos.y = WORLD_BOTTOM_WALL + body1.getRadius();
+                if (body1.pos.y < WORLD_BOTTOM_WALL) {
+                    body1.pos.y = WORLD_BOTTOM_WALL;
                 }
 
-                if (body1.pos.y > WORLD_TOP_WALL - body1.getRadius()) {
-                    body1.pos.y = WORLD_TOP_WALL - body1.getRadius();
+                if (body1.pos.y > WORLD_TOP_WALL) {
+                    body1.pos.y = WORLD_TOP_WALL;
                 }
 
-                if (body1.pos.x > WORLD_RIGHT_WALL - body1.getRadius()) {
-                    body1.pos.x = (WORLD_RIGHT_WALL - body1.getRadius());
-                }
-                if (body1.pos.x < WORLD_LEFT_WALL + body1.getRadius()) {
-                    body1.pos.x = WORLD_LEFT_WALL + body1.getRadius();
+                if (body1.pos.x > WORLD_RIGHT_WALL) {
+                    body1.pos.x = (WORLD_RIGHT_WALL);
+                 }
+                if (body1.pos.x < WORLD_LEFT_WALL) {
+                    body1.pos.x = WORLD_LEFT_WALL ;
                 }
             }
 

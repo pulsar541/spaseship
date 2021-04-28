@@ -15,8 +15,13 @@ import states.MenuState;
 
 public class StarshipGame extends ApplicationAdapter {
 
-	public static final int WIDTH = 800;
-	public static int HEIGHT =  480;
+
+	public static  int WIDTH = 1200;
+	public static int HEIGHT =  800;
+
+	public static int currentLevel = 1;
+	public static int MAX_LEVEL_NUMBER = 64;
+	public static int type = 0;
 
 	public static final String TITLE = "Spaceship";
 	private GameStateManager gsm;
@@ -32,6 +37,9 @@ public class StarshipGame extends ApplicationAdapter {
 
 	@Override
 	public void create() {
+
+		currentLevel = 1;
+
 		batch = new SpriteBatch();
 		gsm = new GameStateManager();
 		// Use LibGDX's default Arial font.1

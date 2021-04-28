@@ -144,11 +144,11 @@ public class Spaceship {
 
 
     public float getRotation() {
-        return kepler.Math.angleFromPositions(_world.getBody(LEFT_ENGINE).pos, _world.getBody(RIGHT_ENGINE).pos);
+        return kepler.Math.angleFromPositions(getPos(), _world.getBody(RIGHT_ENGINE).pos);
     }
 
     public float getRotationRadians() {
-        return kepler.Math.angleRadiansFromPositions(_world.getBody(LEFT_ENGINE).pos, _world.getBody(RIGHT_ENGINE).pos);
+        return kepler.Math.angleRadiansFromPositions(getPos(), _world.getBody(RIGHT_ENGINE).pos);
     }
 
 

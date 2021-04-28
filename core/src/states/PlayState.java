@@ -59,8 +59,9 @@ public class PlayState extends State {
 
     ShapeRenderer shapeRenderer;
     Timer sparseTimer;
-  //  Sound soundDestroyBalls ;
-   // Sound contactBalls ;
+
+
+
    // Music music;
     Texture bgTexture;
     Texture texShip ;
@@ -93,11 +94,17 @@ public class PlayState extends State {
         cameraScreen = new OrthographicCamera();
 
 
+       // if(GameConfig.debugMode) {
+        //    StarshipGame.WIDTH =  1200 * 2;
+        //}
+
         StarshipGame.HEIGHT = StarshipGame.WIDTH * Gdx.graphics.getBackBufferHeight() / Gdx.graphics.getBackBufferWidth();
+
 
         cameraScreen.setToOrtho(false, StarshipGame.WIDTH, StarshipGame.HEIGHT);
 
         cameraLevel = new OrthographicCamera();
+
         cameraShip = new OrthographicCamera();
         cameraStars = new  OrthographicCamera();
 
@@ -116,12 +123,13 @@ public class PlayState extends State {
 //                            spaceship.pushWayPoint();
 //                        }
 
+
                         Asteroid tmpAster;
-                        for(int i = optim_i-5; i < optim_i+5; i++) {
-                            if(i<0 || i>= Level.levelSizeHorCount)
+                        for(int i = optim_i-10; i < optim_i+10; i++) {
+                            if(i<0 || i>= Level.levelSizeHorCount())
                                 continue;
-                            for(int j = optim_j-5; j < optim_j+5; j++) {
-                                if (j < 0 || j >= Level.levelSizeVertCount)
+                            for(int j = optim_j-10; j < optim_j+10; j++) {
+                                if (j < 0 || j >= Level.levelSizeVertCount())
                                     continue;
                                 tmpAster =  level.asteroids.get(level.table[i][j]);
                                 if(tmpAster.getTakesLifeCount() != 100)
@@ -129,10 +137,9 @@ public class PlayState extends State {
                                     world.createBody(tmpAster, tmpAster.getAsteroidUid());
                                 }
 
-                                if(world.getBodyByUid(tmpAster.getAsteroidUid()) != null &&  kepler.Math.farThen(spaceship.getPos(),tmpAster.pos, spaceship.width()*5)) {
+                                if(kepler.Math.farThen(spaceship.getPos(),tmpAster.pos, spaceship.width()*4)) {
                                     world.removeBodyByUid(tmpAster.getAsteroidUid());
                                 }
-
 
                             }
                         }
@@ -170,28 +177,35 @@ public class PlayState extends State {
 //        music.setVolume(0.25f);
 //        music.play();
 
+
         texLevel = new Texture("level0.png");
         if (!texLevel.getTextureData().isPrepared()) {
             texLevel.getTextureData().prepare();
         }
         pixmapLevel = texLevel.getTextureData().consumePixmap();
 
-        world = new World(0, 0, Level.levelSizeHorCount * Level.elementSize, Level.levelSizeVertCount * Level.elementSize);
+
+        world = new World(0, 0, Level.levelSizeHorCount() * Level.elementSize, Level.levelSizeVertCount() * Level.elementSize);
         world.setContactEpsilon(3.0f);
         // world.setGlobalFriction(0.001f);
 
-
-
         spaceship = new Spaceship(world);
-        spaceship.init( new Vec3(Level.elementSize * 10, Level.elementSize * 10, 0), 30, 30);
+        spaceship.init( new Vec3(Level.elementSize * 10, Level.elementSize * 10, 0), Level.elementSize/2, Level.elementSize/2);
         spaceship.setImpulsePower(0.04f);
 
         eclLeft = new EngineControlLever(0.0f);
         eclRight = new EngineControlLever( 0.0f);
 
         level = new Level(world);
+
+
+
+
         //level.load(pixmapLevel);
-        Vec3 startPos = level.generate(spaceship.width() * 3.0f);
+        Vec3 startPos = level.generate(
+                spaceship.width() * 3.0f,
+                StarshipGame.currentLevel);
+
         spaceship.setPos(startPos);
         spaceship.setRespawnPos(spaceship.getPos());
 
@@ -273,23 +287,32 @@ public class PlayState extends State {
             }
         }
 
-        if(Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
+        if(GameConfig.debugMode) {
+            if (Gdx.input.isKeyPressed(Input.Keys.ALT_LEFT)) {
 
-            if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-                cameraLevelOffsetPos.x -= 10;
+                Vec3 tmpSpaceshippos = spaceship.getPos();
 
-            }
+                if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+                  //  cameraLevelOffsetPos.x -= 10;
 
-            if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-                cameraLevelOffsetPos.x += 10;
-            }
+                    spaceship.setPos(new Vec3(tmpSpaceshippos.x-10, tmpSpaceshippos.y, tmpSpaceshippos.z));
 
-            if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                cameraLevelOffsetPos.y += 10;
-            }
+                }
 
-            if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-                cameraLevelOffsetPos.y -= 10;
+                if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+                   // cameraLevelOffsetPos.x += 10;
+                    spaceship.setPos(new Vec3(tmpSpaceshippos.x+10, tmpSpaceshippos.y, tmpSpaceshippos.z));
+                }
+
+                if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+                   // cameraLevelOffsetPos.y += 10;
+                    spaceship.setPos(new Vec3(tmpSpaceshippos.x, tmpSpaceshippos.y+10, tmpSpaceshippos.z));
+                }
+
+                if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+                   // cameraLevelOffsetPos.y -= 10;
+                    spaceship.setPos(new Vec3(tmpSpaceshippos.x, tmpSpaceshippos.y-10, tmpSpaceshippos.z));
+                }
             }
         }
 
@@ -339,6 +362,12 @@ public class PlayState extends State {
 
         }
 
+
+        //cameraLevel.position.x = (float)Math.floor(cameraLevel.position.x/2.0f)*2.0f;
+        //cameraLevel.position.y = (float)Math.floor(cameraLevel.position.y/2.0f)*2.0f;
+
+
+
         cameraLevel.update();
         cameraShip.update();
         cameraStars.update();
@@ -350,27 +379,76 @@ public class PlayState extends State {
 
         Asteroid tmpAster;
 
-        for(int i = optim_i-5; i < optim_i+5; i++) {
-            if(i<0 || i>= Level.levelSizeHorCount)
-                continue;
 
-            for(int j = optim_j-5; j < optim_j+5; j++) {
-                if (j < 0 || j >= Level.levelSizeVertCount)
+        if(!GameConfig.debugMode) {
+
+
+
+            for (int i = optim_i - 5; i < optim_i + 5; i++) {
+                if (i < 0 || i >= Level.levelSizeHorCount())
                     continue;
 
-                tmpAster =  level.asteroids.get(level.table[i][j]);
+                for (int j = optim_j - 5; j < optim_j + 5; j++) {
+                    if (j < 0 || j >= Level.levelSizeVertCount())
+                        continue;
+
+                    tmpAster = level.asteroids.get(level.table[i][j]);
 
 
-                if(kepler.Math.nearestThen(spaceship.getPos(),tmpAster.pos, spaceship.width0()*0.65f + tmpAster.getRadius() * 0.5f)) {
+                    if (kepler.Math.nearestThen(spaceship.getPos(), tmpAster.pos, spaceship.width0() * 2.65f + tmpAster.getRadius() * 0.5f)) {
 
-                    world.createBody((Body) tmpAster, tmpAster.getAsteroidUid());
+                            tmpAster.setKinematic(true);
+                            world.createBody((Body) tmpAster, tmpAster.getAsteroidUid());
 
-                    spaceship.life -= tmpAster.getTakesLifeCount();
-                    if( spaceship.life <= 0) {
-                        spaceship.life = 0;
+                        spaceship.life -= tmpAster.getTakesLifeCount();
+                        if (spaceship.life <= 0) {
+                            spaceship.life = 0;
+                        }
                     }
                 }
             }
+
+
+
+           // Asteroid tmpAster;
+            for(int i = optim_i-10; i < optim_i+10; i++) {
+                if(i<0 || i>= Level.levelSizeHorCount())
+                    continue;
+                for(int j = optim_j-0; j < optim_j+10; j++) {
+                    if (j < 0 || j >= Level.levelSizeVertCount())
+                        continue;
+
+                   // if(!level.isGameElement(i,j))
+                   //     continue;
+
+                    tmpAster =  level.asteroids.get(level.table[i][j]);
+                   /* if(tmpAster.getTakesLifeCount() != 100)
+                        if(kepler.Math.nearestThen(spaceship.getPos(),tmpAster.pos, spaceship.width()*3)) {
+                            world.createBody(tmpAster, tmpAster.getAsteroidUid());
+                        }
+*/
+                    if (kepler.Math.nearestThen(spaceship.getPos(), tmpAster.pos, spaceship.width0() * 1.0f )) {
+
+                        //tmpAster.setKinematic(true);
+                        //world.createBody((Body) tmpAster, tmpAster.getAsteroidUid());
+
+                        spaceship.life -= tmpAster.getTakesLifeCount();
+                        if (spaceship.life <= 0) {
+                            spaceship.life = 0;
+                        }
+                    }
+
+                    /*
+                    if(world.getBodyByUid(tmpAster.getAsteroidUid()) != null &&  kepler.Math.farThen(spaceship.getPos(),tmpAster.pos, spaceship.width()*8)) {
+                        world.removeBodyByUid(tmpAster.getAsteroidUid());
+                    }*/
+
+
+                }
+            }
+
+
+
         }
 
 
@@ -383,9 +461,15 @@ public class PlayState extends State {
             if(kepler.Math.nearestThen(spaceship.getPos(),tmpStar, spaceship.width()*0.85f)) {
                 score ++;
                 spaceship.setRespawnPos(tmpStar);
-                if(score >= 10) {
-                    score = 10;
-                    gsm.set(new YouWinState(gsm));
+                if(score >= Level.STARS_COUNT) {
+                    score = Level.STARS_COUNT;
+
+                    if(StarshipGame.currentLevel == StarshipGame.MAX_LEVEL_NUMBER) {
+                        gsm.set(new YouWinState(gsm));
+                    } else {
+                        StarshipGame.currentLevel++;
+                        gsm.set(new LoadingLevelState(gsm));
+                    }
                 }
                 level.stars.remove(i);
                 break;
@@ -427,12 +511,15 @@ public class PlayState extends State {
         sb.begin();
 
         Asteroid tmpAster;
-        for(int i = optim_i-15; i < optim_i+15; i++) {
-            if(i<0 || i>= Level.levelSizeHorCount)
+
+        int deltaOptim = GameConfig.debugMode ? 100 : 20;
+
+        for(int i = optim_i-deltaOptim; i < optim_i+deltaOptim; i++) {
+            if(i<0 || i>= Level.levelSizeHorCount())
                 continue;
 
-            for(int j = optim_j-15; j < optim_j+15; j++) {
-                if (j < 0 || j >= Level.levelSizeVertCount)
+            for(int j = optim_j-deltaOptim; j < optim_j+deltaOptim; j++) {
+                if (j < 0 || j >= Level.levelSizeVertCount())
                     continue;
 
                 tmpAster = level.asteroids.get(level.table[i][j]);
@@ -447,6 +534,8 @@ public class PlayState extends State {
 
             }
         }
+
+
 
 
         sb.end();
@@ -466,6 +555,27 @@ public class PlayState extends State {
                     level.elementSize );
         }
         sb.end();
+
+
+
+
+        if(GameConfig.debugMode) {
+            sb.begin();
+            int bodies_size = world.bodies.size();
+            for(int i = 0; i < bodies_size; i++) {
+                Body tmpBody =  world.getBody(i);
+
+                sb.draw(  texAsteroidRed ,
+                        tmpBody.getPos().x-tmpBody.getRadius() ,
+                        tmpBody.getPos().y-tmpBody.getRadius(),
+                        tmpBody.getRadius()*2.0f,
+                        tmpBody.getRadius()*2.0f);
+
+            }
+            sb.end();
+        }
+
+
 
         sb.setProjectionMatrix(cameraShip.combined);
         sb.begin();
@@ -629,12 +739,16 @@ public class PlayState extends State {
 
 
 
+
+
+
+
         Gdx.gl.glDisable(GL20.GL_BLEND);
 
 
         sb.setProjectionMatrix(cameraScreen.combined);
         sb.begin();
-         font.draw(sb, String.valueOf( score ) + " / " + String.valueOf( level.stars.size() ),  StarshipGame.WIDTH - 80 , StarshipGame.HEIGHT - 20);
+         font.draw(sb, String.valueOf( score ) + " / " + String.valueOf( Level.STARS_COUNT ),  StarshipGame.WIDTH - 80 , StarshipGame.HEIGHT - 20);
          font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
          font.getData().setScale(2);
         sb.end();
@@ -657,6 +771,11 @@ public class PlayState extends State {
             sb.draw(texStar,10 + i*32, StarshipGame.HEIGHT - 35, 25, 25  );
         }
         sb.end();
+
+
+
+
+
 
     }
 

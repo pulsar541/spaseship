@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import com.badlogic.gdx.math.Vector3;
+import com.mygdx.game.StarshipGame;
 
 import java.awt.TextArea;
 
@@ -21,6 +22,7 @@ public class MenuState  extends State {
     BitmapFont font = new BitmapFont();
 
 
+    Texture bg;
     ButtonImage biPlay;
     ButtonImage biPlayGravity;
     ButtonImage biMultiplayer;
@@ -35,10 +37,11 @@ public class MenuState  extends State {
         camera  = new OrthographicCamera();
         camera.setToOrtho(false, width, height);
 
-        biPlay = new ButtonImage("btnPlay.png",    Gdx.graphics.getWidth()/4 ,  Gdx.graphics.getHeight()/2 );
-        biPlayGravity = new ButtonImage("btnPlayGravity.png",    3*Gdx.graphics.getWidth()/4 ,  Gdx.graphics.getHeight()/2 );
-        biMultiplayer = new ButtonImage("btnMultiplayer.png",    Gdx.graphics.getWidth()/2 ,  Gdx.graphics.getHeight() / 5 );
+        biPlay = new ButtonImage("btnPlay.png",    Gdx.graphics.getWidth() - Gdx.graphics.getWidth() /4 ,  Gdx.graphics.getHeight()/2 );
+       // biPlayGravity = new ButtonImage("btnPlayGravity.png",    3*Gdx.graphics.getWidth()/4 ,  Gdx.graphics.getHeight()/2 );
+       // biMultiplayer = new ButtonImage("btnMultiplayer.png",    Gdx.graphics.getWidth()/2 ,  Gdx.graphics.getHeight() / 5 );
 
+        bg = new Texture("maintitle.png");
     }
 
     @Override
@@ -50,23 +53,19 @@ public class MenuState  extends State {
             camera.unproject(touchPos);
 
             if (biPlay.isTouched(touchPos)) {
-                PlayState playState = new PlayState(gsm);
-                playState.allowGravity(false);
-                gsm.set(playState);
-
+                StarshipGame.type = 0;
+                gsm.set(new LoadingLevelState(gsm));
             }
 
-            if (biPlayGravity.isTouched(touchPos)) {
-                PlayState playState = new PlayState(gsm);
-                playState.allowGravity(true);
-                gsm.set(playState);
+           // if (biPlayGravity.isTouched(touchPos)) {
+          //      StarshipGame.type = 1;
+          //      gsm.set(new LoadingLevelState(gsm));
+         //  }
 
-            }
-
-            if (biMultiplayer.isTouched(touchPos)) {
-                MultiplayerMenuState multiplayerMenuState = new MultiplayerMenuState(gsm);
-                gsm.set(multiplayerMenuState);
-            }
+           // if (biMultiplayer.isTouched(touchPos)) {
+           //     MultiplayerMenuState multiplayerMenuState = new MultiplayerMenuState(gsm);
+           //     gsm.set(multiplayerMenuState);
+           // }
         }
     }
 
@@ -80,21 +79,25 @@ public class MenuState  extends State {
 
     @Override
     public void render(SpriteBatch sb) {
+
+        sb.begin();
+        sb.draw(bg,0,  0, StarshipGame.WIDTH, StarshipGame.HEIGHT  );
+        sb.end();
         sb.begin();
       //   sb.draw(textureRegion,0,0, drawingWidth, drawingHeight);
       //  font.draw(sb, "PLAY", Gdx.graphics.getWidth()/2-10, Gdx.graphics.getHeight() /2);
 
-        font.draw(sb, "programmer: E.U.", 20, 40);
-        font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-        font.getData().setScale(2);
+            font.draw(sb, "programmer: E.U.", 20, 40);
+            font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+            font.getData().setScale(2);
 
 
-        biPlay.draw(sb);
-        biPlayGravity.draw(sb);
-        biMultiplayer.draw(sb);
-
-
+            biPlay.draw(sb);
+           // biPlayGravity.draw(sb);
+           // biMultiplayer.draw(sb);
         sb.end();
+
+
 
     }
 
