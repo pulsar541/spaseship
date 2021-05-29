@@ -1,7 +1,6 @@
 package states;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -9,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import com.badlogic.gdx.math.Vector3;
-import com.mygdx.game.StarshipGame;
+import com.pulsaruniverse.hsg.StarshipGame;
 
 import java.awt.TextArea;
 
@@ -37,11 +36,12 @@ public class MenuState  extends State {
         camera  = new OrthographicCamera();
         camera.setToOrtho(false, width, height);
 
-        biPlay = new ButtonImage("btnPlay.png",    Gdx.graphics.getWidth() - Gdx.graphics.getWidth() /4 ,  Gdx.graphics.getHeight()/2 );
+        biPlay = new ButtonImage("btnPlay.png",    Gdx.graphics.getWidth() - Gdx.graphics.getWidth() /4 ,  Gdx.graphics.getHeight()/2, 2 );
        // biPlayGravity = new ButtonImage("btnPlayGravity.png",    3*Gdx.graphics.getWidth()/4 ,  Gdx.graphics.getHeight()/2 );
        // biMultiplayer = new ButtonImage("btnMultiplayer.png",    Gdx.graphics.getWidth()/2 ,  Gdx.graphics.getHeight() / 5 );
 
         bg = new Texture("maintitle.png");
+
     }
 
     @Override
@@ -87,9 +87,14 @@ public class MenuState  extends State {
       //   sb.draw(textureRegion,0,0, drawingWidth, drawingHeight);
       //  font.draw(sb, "PLAY", Gdx.graphics.getWidth()/2-10, Gdx.graphics.getHeight() /2);
 
-            font.draw(sb, "programmer: E.U.", 20, 40);
-            font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
-            font.getData().setScale(2);
+            font.draw(sb, "version 0.54", 40, 80);
+            font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            font.getData().setScale(3);
+
+
+            font.draw(sb,  "(c) 2021 pulsaruniverse", Gdx.graphics.getWidth()/2, 80);
+            font.getRegion().getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
+            font.getData().setScale(3);
 
 
             biPlay.draw(sb);

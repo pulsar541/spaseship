@@ -2,7 +2,7 @@ package states;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.mygdx.game.StarshipGame;
+import com.pulsaruniverse.hsg.StarshipGame;
 
 public class YouWinState extends State {
 

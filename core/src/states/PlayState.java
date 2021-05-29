@@ -2,6 +2,7 @@ package states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -12,13 +13,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
-import com.mygdx.game.Asteroid;
-import com.mygdx.game.StarshipGame;
-import com.mygdx.game.EngineControlLever;
-import com.mygdx.game.GameConfig;
-import com.mygdx.game.Level;
-import com.mygdx.game.Spaceship;
-import com.mygdx.game.Star;
+import com.pulsaruniverse.hsg.Asteroid;
+import com.pulsaruniverse.hsg.StarshipGame;
+import com.pulsaruniverse.hsg.EngineControlLever;
+import com.pulsaruniverse.hsg.GameConfig;
+import com.pulsaruniverse.hsg.Level;
+import com.pulsaruniverse.hsg.Spaceship;
+import com.pulsaruniverse.hsg.Star;
 
 
 import java.util.Timer;
@@ -61,6 +62,11 @@ public class PlayState extends State {
     Timer sparseTimer;
 
 
+    Sound soundEngine;
+    long soundId;
+
+    Sound soundPickup;
+
 
    // Music music;
     Texture bgTexture;
@@ -70,9 +76,13 @@ public class PlayState extends State {
     Texture texExplosive;
     Texture texEcl;
     Texture texCamera;
+    Texture texCamera2;
+    Texture texPause;
+    Texture texUnpause;
     Texture texStar;
 
     Rectangle rectButCamera;
+    Rectangle rectButPause;
 
     Texture texLevel;
     Pixmap pixmapLevel;
@@ -81,7 +91,7 @@ public class PlayState extends State {
 
     Vector3 cameraLevelOffsetPos = new Vector3(0,0,0);
 
-
+    private boolean soundIsPlayed = false;
 
     int optim_i ;
     int optim_j ;
@@ -168,9 +178,14 @@ public class PlayState extends State {
         texExplosive = new Texture("explosive.png");
         texEcl = new Texture("ecl.png");
         texCamera = new Texture("camera.png");
+        texCamera2 = new Texture("camera2.png");
+
+        texPause = new Texture("pause.png");
+        texUnpause = new Texture("unpause.png");
         texStar = new Texture("star.png");
 
-       // soundDestroyBalls = Gdx.audio.newSound(Gdx.files.internal("removeballs.mp3"));
+        soundEngine = Gdx.audio.newSound(Gdx.files.internal("engine.ogg"));
+        soundPickup = Gdx.audio.newSound(Gdx.files.internal("pickup.ogg"));
        /// contactBalls = Gdx.audio.newSound(Gdx.files.internal("twoballs.mp3"));
 //        music = Gdx.audio.newMusic(Gdx.files.internal("music.ogg"));
 //        music.setLooping(true);
@@ -215,7 +230,21 @@ public class PlayState extends State {
         float texCamH  = texCamW  * texCamera.getHeight()  /  texCamera.getWidth();
         rectButCamera.set( StarshipGame.WIDTH / 2 - texCamW / 2 , StarshipGame.HEIGHT - texCamH - 10,   texCamW,  texCamH );
 
+
+        rectButPause = new Rectangle();
+        float texPauseW  = texPause.getWidth() / 3;
+        float texPauseH  = texPauseW  * texPause.getHeight()  /  texPause.getWidth();
+        rectButPause.set( StarshipGame.WIDTH / 3 , StarshipGame.HEIGHT - texCamH - 10,   texPauseW,  texPauseH );
+
+
         score = 0;
+
+
+        soundId = soundEngine.play(0.0f, 1.0f, 0.0f);
+        soundEngine.setLooping(soundId, true);
+      //  soundEngine.pause();
+
+
     }
 
 
@@ -226,13 +255,19 @@ public class PlayState extends State {
         tryDispose(texShip);
         tryDispose(texAsteroid);
         tryDispose(texLevel);
-        //  tryDispose(soundDestroyBalls);
+
         // tryDispose(music);
         tryDispose(texRocketfire);
         tryDispose(texExplosive);
         tryDispose(texEcl);
         tryDispose(texCamera);
+        tryDispose(texCamera2);
+        tryDispose(texPause);
+        tryDispose(texUnpause);
         tryDispose(texStar);
+
+        tryDispose(soundEngine);
+        //tryDispose(soundPickup);
     }
 
     @Override
@@ -242,32 +277,37 @@ public class PlayState extends State {
         boolean isEclRightBusy = false;
         for(int i = 0; i < 4; i++) {
             if (Gdx.input.isTouched(i)) {
-                if (Gdx.input.getX(i) < Gdx.graphics.getBackBufferWidth() / 3) {
+                if (Gdx.input.getX(i) < Gdx.graphics.getBackBufferWidth() / 4) {
+
                     eclLeft.setValue(2.0f * Gdx.input.getY(i) / Gdx.graphics.getBackBufferHeight() - 1.0f);
 
-                    if(_allowGravity)
-
                     if(eclLeft.getValue() > 0)
-                        eclLeft.setValue( eclLeft.getValue() - 0.02f);
+                        eclLeft.changeValue(- 0.02f);
                     else if(eclLeft.getValue() < 0)
-                        eclLeft.setValue( eclLeft.getValue() + 0.02f);
+                        eclLeft.changeValue(0.02f);
 
-                    isEclLeftBusy = true;
 
                 }
-                if (Gdx.input.getX(i) > 2 * Gdx.graphics.getBackBufferWidth() / 3)  {
+                if (Gdx.input.getX(i) > 3 * Gdx.graphics.getBackBufferWidth() / 4)  {
+
                     eclRight.setValue(2.0f * Gdx.input.getY(i) / Gdx.graphics.getBackBufferHeight() - 1.0f);
 
                     if(eclRight.getValue() > 0)
-                        eclRight.setValue( eclRight.getValue() - 0.02f);
+                        eclRight.changeValue(- 0.02f);
                     else if(eclRight.getValue() < 0)
-                        eclRight.setValue( eclRight.getValue() + 0.02f);
+                        eclRight.changeValue(0.02f);
 
                     isEclRightBusy = true;
 
                 }
             }
+
         }
+
+
+
+
+
 
         if(!isEclLeftBusy) {
             eclLeft.setValue( eclLeft.getValue() * 0.9f);
@@ -284,6 +324,17 @@ public class PlayState extends State {
             cameraScreen.unproject(touchPos);
             if (rectButCamera.overlaps(new Rectangle(touchPos.x - rectButCamera.width / 2, touchPos.y - rectButCamera.height / 2, rectButCamera.width, rectButCamera.height))) {
                 GameConfig.useArcadeCamera = !GameConfig.useArcadeCamera;
+            }
+
+            if (rectButPause.overlaps(new Rectangle(touchPos.x - rectButPause.width / 2, touchPos.y - rectButPause.height / 2, rectButPause.width, rectButPause.height))) {
+                GameConfig.gamePaused = !GameConfig.gamePaused;
+
+                if(GameConfig.gamePaused) {
+                    soundEngine.pause();
+                }
+                else {
+                    soundEngine.resume();
+                }
             }
         }
 
@@ -321,8 +372,22 @@ public class PlayState extends State {
     @Override
     public void update(float dt) {
 
-        spaceship.update(dt);
+        if(!GameConfig.gamePaused)
+            spaceship.update(dt);
+
+
         handleInput();
+
+
+        if(GameConfig.gamePaused)
+            return;
+
+
+
+        soundEngine.setVolume(soundId,  Math.abs(eclLeft.getValue() + eclRight.getValue())*5.0f);
+
+
+
 
         float impulseMulCoeff = _allowGravity ? 0.03f : 0.01f;
 
@@ -380,9 +445,8 @@ public class PlayState extends State {
         Asteroid tmpAster;
 
 
-        if(!GameConfig.debugMode) {
-
-
+        if(!GameConfig.debugMode)
+        {
 
             for (int i = optim_i - 5; i < optim_i + 5; i++) {
                 if (i < 0 || i >= Level.levelSizeHorCount())
@@ -397,57 +461,21 @@ public class PlayState extends State {
 
                     if (kepler.Math.nearestThen(spaceship.getPos(), tmpAster.pos, spaceship.width0() * 2.65f + tmpAster.getRadius() * 0.5f)) {
 
-                            tmpAster.setKinematic(true);
-                            world.createBody((Body) tmpAster, tmpAster.getAsteroidUid());
+                        tmpAster.setKinematic(true);
+                        world.createBody((Body) tmpAster, tmpAster.getAsteroidUid());
 
-                        spaceship.life -= tmpAster.getTakesLifeCount();
-                        if (spaceship.life <= 0) {
-                            spaceship.life = 0;
+
+                        if (kepler.Math.nearestThen(spaceship.getPos(), tmpAster.pos, spaceship.width0() + tmpAster.getRadius() * 0.9f  )) {
+                            spaceship.life -= tmpAster.getTakesLifeCount();
+                            if (spaceship.life <= 0) {
+                                spaceship.life = 0;
+                            }
                         }
+
+
                     }
                 }
             }
-
-
-
-           // Asteroid tmpAster;
-            for(int i = optim_i-10; i < optim_i+10; i++) {
-                if(i<0 || i>= Level.levelSizeHorCount())
-                    continue;
-                for(int j = optim_j-0; j < optim_j+10; j++) {
-                    if (j < 0 || j >= Level.levelSizeVertCount())
-                        continue;
-
-                   // if(!level.isGameElement(i,j))
-                   //     continue;
-
-                    tmpAster =  level.asteroids.get(level.table[i][j]);
-                   /* if(tmpAster.getTakesLifeCount() != 100)
-                        if(kepler.Math.nearestThen(spaceship.getPos(),tmpAster.pos, spaceship.width()*3)) {
-                            world.createBody(tmpAster, tmpAster.getAsteroidUid());
-                        }
-*/
-                    if (kepler.Math.nearestThen(spaceship.getPos(), tmpAster.pos, spaceship.width0() * 1.0f )) {
-
-                        //tmpAster.setKinematic(true);
-                        //world.createBody((Body) tmpAster, tmpAster.getAsteroidUid());
-
-                        spaceship.life -= tmpAster.getTakesLifeCount();
-                        if (spaceship.life <= 0) {
-                            spaceship.life = 0;
-                        }
-                    }
-
-                    /*
-                    if(world.getBodyByUid(tmpAster.getAsteroidUid()) != null &&  kepler.Math.farThen(spaceship.getPos(),tmpAster.pos, spaceship.width()*8)) {
-                        world.removeBodyByUid(tmpAster.getAsteroidUid());
-                    }*/
-
-
-                }
-            }
-
-
 
         }
 
@@ -461,6 +489,9 @@ public class PlayState extends State {
             if(kepler.Math.nearestThen(spaceship.getPos(),tmpStar, spaceship.width()*0.85f)) {
                 score ++;
                 spaceship.setRespawnPos(tmpStar);
+                level.stars.remove(i);
+                soundPickup.play(1.0f, 1.0f, 0.0f);
+
                 if(score >= Level.STARS_COUNT) {
                     score = Level.STARS_COUNT;
 
@@ -471,7 +502,8 @@ public class PlayState extends State {
                         gsm.set(new LoadingLevelState(gsm));
                     }
                 }
-                level.stars.remove(i);
+
+
                 break;
             }
 
@@ -565,7 +597,7 @@ public class PlayState extends State {
             for(int i = 0; i < bodies_size; i++) {
                 Body tmpBody =  world.getBody(i);
 
-                sb.draw(  texAsteroidRed ,
+                sb.draw(  texExplosive ,
                         tmpBody.getPos().x-tmpBody.getRadius() ,
                         tmpBody.getPos().y-tmpBody.getRadius(),
                         tmpBody.getRadius()*2.0f,
@@ -691,56 +723,6 @@ public class PlayState extends State {
 
 
 
-//        shapeRenderer.setProjectionMatrix(cameraLevel.combined);
-//
-//        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-//        shapeRenderer.setColor(new Color(Color.rgba8888(1.0f, 1.0f, 1.0f, 0.5f)));
-//
-//
-//        int optim_i = (int) (spaceship.getPos().x / level.elementSize);
-//        int optim_j = (int) (spaceship.getPos().y / level.elementSize);
-//
-//        for(int i = optim_i-5; i < optim_i+5; i++) {
-//            if(i<0 || i>=100)
-//                continue;
-//
-//            for(int j = optim_j-5; j < optim_j+5; j++) {
-//                if (j < 0 || j >= 100)
-//                    continue;
-//
-//
-//                float x = level.asteroids.get(level.table[i][j]).pos.x;
-//                float y = level.asteroids.get(level.table[i][j]).pos.y;
-//
-//                shapeRenderer.identity();
-//                shapeRenderer.translate(x, y, 0.f);
-//                shapeRenderer.rect(-8, -8, 16, 16);
-//
-//            }
-//
-//        }
-//
-//        shapeRenderer.end();
-
-
-
-
-
-
-        //            for ( int i = 0; i < ballsSize; i++) {
-//                sb.draw(  texShip,
-//                        world.getBody(i).getPos().x - world.getBody(i).getRadius(),
-//                        world.getBody(i).getPos().y- world.getBody(i).getRadius(),
-//                        world.getBody(i).getRadius() * 2,
-//                        world.getBody(i).getRadius() * 2 );
-//
-//            }
-
-
-
-
-
-
 
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -748,6 +730,7 @@ public class PlayState extends State {
 
         sb.setProjectionMatrix(cameraScreen.combined);
         sb.begin();
+         sb.draw(texStar,StarshipGame.WIDTH - 120, StarshipGame.HEIGHT - 43, 27, 25  );
          font.draw(sb, String.valueOf( score ) + " / " + String.valueOf( Level.STARS_COUNT ),  StarshipGame.WIDTH - 80 , StarshipGame.HEIGHT - 20);
          font.getRegion().getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
          font.getData().setScale(2);
@@ -763,17 +746,31 @@ public class PlayState extends State {
         sb.begin();
         float texCamW  = texCamera.getWidth() / 3;
         float texCamH  = texCamW  * texCamera.getHeight()  /  texCamera.getWidth();
-        sb.draw(texCamera,rectButCamera.x, rectButCamera.y, rectButCamera.width, rectButCamera.height);
+
+        if(GameConfig.useArcadeCamera)
+            sb.draw(texCamera,rectButCamera.x, rectButCamera.y, rectButCamera.width, rectButCamera.height);
+        else
+            sb.draw(texCamera2,rectButCamera.x, rectButCamera.y, rectButCamera.width, rectButCamera.height);
+
+
         sb.end();
 
         sb.begin();
-        for(int i = 0; i< score; i++) {
-            sb.draw(texStar,10 + i*32, StarshipGame.HEIGHT - 35, 25, 25  );
-        }
+        float texPauseW  = texPause.getWidth() / 3;
+        float texPauseH  = texPauseW  * texPause.getHeight()  /  texPause.getWidth();
+
+        if(GameConfig.gamePaused)
+            sb.draw(texUnpause,rectButPause.x, rectButPause.y, rectButPause.width, rectButPause.height);
+        else
+            sb.draw(texPause,rectButPause.x, rectButPause.y, rectButPause.width, rectButPause.height);
+
         sb.end();
 
-
-
+       // sb.begin();
+        //for(int i = 0; i< score; i++) {
+        //    sb.draw(texStar,10 + i*32, StarshipGame.HEIGHT - 35, 25, 25  );
+        //}
+       // sb.end();
 
 
 
